@@ -1,8 +1,10 @@
 package bgengine
 
-import org.scalatest.FunSuite
+import org.scalatest.{FlatSpec, Matchers}
 
-class PositionRecordTest extends FunSuite {
+class PositionRecordTest extends FlatSpec with Matchers {
+
+
   // describe("PositionRecord.initializeFromId", function(){
   //    var positionRecord;
   //

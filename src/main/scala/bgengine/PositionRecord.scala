@@ -57,33 +57,27 @@ object PositionRecord {
     var bytes = stringToBytes(s);
 
     for (
-    var c = 0;
-    c < (s.length / 4 + 1);
-    c ++
+       c <- 0 until (s.length / 4 + 1)
     )
     { // take 4 characters at a time; they will become 3 bytes
       for (
-      var b = 0;
-      b < 4;
-      b ++
+          b <- 0 until 4
       )
       {
         var index = c * 4 + b;
         if (index >= bytes.length)
           break;
 
-        var ch = base64.indexOf(String.fromCharCode(bytes[index])); // remove 'base 64' encoding 
+        var ch = base64.indexOf(String.fromCharCode(bytes(index))) // remove 'base 64' encoding
         var mask = 1;
         // every character represents 6 bits.      
         for (
-        var bit = 0;
-        (bit < 6);
-        bit ++
+          bit <- 0 until 6
         )
         {
           // find the position at which this bit will be located
-          var pos = c * 24 + positions[b * 6 + bit];
-          bits[pos] = (ch & mask) / mask;
+          var pos = c * 24 + positions(b * 6 + bit)
+          bits(pos) = (ch & mask) / mask;
           mask = mask * 2; // ready for the next bit
         }
       }
@@ -99,18 +93,18 @@ object PositionRecord {
    * @param matchId the gnu match id
    */
   def initializeFromId(posId: String, matchId: String): PositionRecord = {
-    posId = trim(posId);
-    matchId = trim(matchId);
+    posId = posId.trim()
+    matchId = matchId.trim()
 
-    this.setDefaultValues();
+    // this.setDefaultValues();
 
     // first we need to know if player zero or player one is on roll. So dissect the matchId first
-    this.dissectMatchId(matchId);
+    val result = dissectMatchId(matchId);
 
     // dissect the position id
     var bytes = stringToBytes(posId);
     var nrPlayersCounted = 0;
-    var player = this.playerOnRoll;
+    var player = result.playerOnRoll;
     var point = 1;
     var nrOnPoint = 0;
     var ready = false;
@@ -118,19 +112,19 @@ object PositionRecord {
     var bits = base64ToBits(posId, 160);
 
     for (var c = 0; c < bits.length && !ready; c++) {
-      if (bits[c] != 1) {
+      if (bits(c) != 1) {
         // a zero marks the end of a point
-        this.checkers[player][point] = nrOnPoint;
+        result.checkers(player)(point) = nrOnPoint;
         nrOnPoint = 0;
 
         if (point >= 25) {
           nrPlayersCounted++;
           // calculate nr of checkers on point 0;
           var nrOff = 15;
-          for (var i = 1; i < 26; i++) {
-            nrOff -= this.checkers[player][i];
+          for (i <- 1 until 26) {
+            nrOff -= result.checkers(player)(i)
           }
-          this.checkers[player][0] = nrOff;
+          result.checkers(player)(0) = nrOff;
 
           if (nrPlayersCounted == 2) {
             ready = true;
@@ -141,13 +135,15 @@ object PositionRecord {
           }
         }
         else {
-          point++;
+          point = point + 1
         }
       }
       else {
-        nrOnPoint++;
+        nrOnPoint = nrOnPoint + 1
       }
     }
+
+    result
   }
 
   def dissectMatchId(matchId: String): PositionRecord = {
@@ -230,36 +226,38 @@ case class PositionRecord(checkers: Array[Array[Int]], cubeValue: Int, cubeOwner
        point <- 1 until 26
       )
       {
-        var nr = checkers(player)(point);
+        val nr = checkers(player)(point);
         for (
           t <- 0 until nr
         )
         {
-          nrCheckersSoFar ++;
+          nrCheckersSoFar = nrCheckersSoFar + 1
           if (nrCheckersSoFar > 15)
             sys.error ("Player " + nrPlayers + " has more than 15 checkers");
-          bits[pos ++] = 1;
+          bits(pos) = 1
+          pos = pos + 1
         }
-        bits[pos ++] = 0;
+        bits(pos) = 0
+        pos = pos + 1
       }
       player = (~player) & 1; // player := not player
     }
     // turn it into characters
-    return makeBase64String(bits, 14);
+    makeBase64String(bits, 14)
   };
 
   /**
    * @return the 2-log of the cube
    */
   def getTwoLogOfCube(): Int = {
-    var twoLog = 0;
-    var power = 1;
+    var twoLog = 0
+    var power = 1
     while (power < this.cubeValue) {
-      power = power * 2;
-      twoLog ++;
+      power = power * 2
+      twoLog = twoLog + 1
     }
-    return twoLog;
-  };
+    twoLog
+  }
 
   /**
    * @return the gnu match id
