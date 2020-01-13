@@ -4,19 +4,20 @@ import model._
 
 object MoveGenerator {
   // transform roll to 2 or 4 halfrolls. Recursively generate halfmoves. Remove duplicates.
-  def generateMoves(position: Position, die1: Int, die2: Int): Seq[Move] = {
+  def generateMoves(position: Position, die1: Int, die2: Int): Set[Move] = {
     def recurseGenerateMoves(position: Position, dies: Seq[Int]): Seq[Move] = {
       dies match {
         case Nil     => Seq()
         case x +: xs => generateHalfMoves(position, x).flatMap(m => {
-          val newPos = Position.applyHalfMove(m)
-          recurseGenerateMoves(newPos, xs).map(m2 => m2.copy(halfMoves = m +: m2.halfMoves))
+          val newPos = Position.applyHalfMove(m, position)
+          val followUps = recurseGenerateMoves(newPos, xs)
+          if (followUps.isEmpty) Seq(Move(position.turn, Seq(m))) else followUps.map(m2 => m2.copy(halfMoves = m +: m2.halfMoves))
         })
       }
     }
 
     val dies = if (die1 == die2) Seq(die1, die1, die1, die1) else Seq(die1, die2)
-    val candidates = recurseGenerateMoves(position, dies)
+    val candidates = if (die1 == die2) recurseGenerateMoves(position, dies) else recurseGenerateMoves(position, dies) ++ recurseGenerateMoves(position, dies.reverse)
     val withoutInvalids = removeInvalids(dies)(candidates)
     removeDuplicates(withoutInvalids)
   }
@@ -32,11 +33,13 @@ object MoveGenerator {
     // when on the bar: only move from 25 point considered.
     val fromCandidates =
       if (isOnBar) Seq(25)
-      else (1 to 24).filter(p => (!isBearingOff && p > die) || (isBearingOff && (p >= die || p == highestPoint)))
+      else (1 to 24)
+        .filter(p => position.nrCheckersOn(p, onRoll) >= 1)
+        .filter(p => (!isBearingOff && p > die) || (isBearingOff && (p >= die || p == highestPoint)))
 
     fromCandidates
       .filterNot(p => p - die > 0 && position.nrCheckersOn(25 - (p - die), Player.inverse(onRoll)) >= 2)
-      .map(p => HalfMove(p, p - die, position.nrCheckersOn(25 - (p - die), Player.inverse(onRoll)) == 1))
+      .map(p => HalfMove(p, Math.max(0, p - die), p - die > 0 && position.nrCheckersOn(25 - (p - die), Player.inverse(onRoll)) == 1))
   }
 
 
@@ -70,7 +73,7 @@ object MoveGenerator {
 
   }
 
-  def removeDuplicates(moves: Seq[Move]): Seq[Move] = {
-    moves.toSet.toSeq     // TODO this relies on the equals method in Move, which for this reason has to know if it is a hit or not. Perhaps better to move this logic somewhere else.
+  def removeDuplicates(moves: Seq[Move]): Set[Move] = {
+    moves.toSet
   }
 }
