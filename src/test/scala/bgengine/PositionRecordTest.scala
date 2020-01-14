@@ -4,155 +4,90 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class PositionRecordTest extends FlatSpec with Matchers {
 
+  "initializeFromId" should "initialize the initial position without errors" in {
+    val positionRecord = PositionRecord.initializeFromId("4HPwATDgc/ABMA", "cIgfAAAAAAAA")
 
-  // describe("PositionRecord.initializeFromId", function(){
-  //    var positionRecord;
-  //
-  //    beforeEach(function(){
-  //        positionRecord = new PositionRecord();
-  //    });
-  //
-  //    it("should initialize the initial position without errors", function(){
-  //        positionRecord.initializeFromId("4HPwATDgc/ABMA", "cIgfAAAAAAAA");
-  //        expect(positionRecord.checkers[0][6]).toEqual(5);
-  //        expect(positionRecord.checkers[1][6]).toEqual(5);
-  //        expect(positionRecord.checkers[0][0]).toEqual(0);
-  //        expect(positionRecord.checkers[1][0]).toEqual(0);
-  //        expect(positionRecord.checkers[0][24]).toEqual(2);
-  //        expect(positionRecord.checkers[1][24]).toEqual(2);
-  //
-  //		expect(positionRecord.cubeValue).toEqual(1);
-  //    });
-  //
-  //    it("should initialize the some middlegame position without errors", function(){
-  //        positionRecord.initializeFromId("sG3wABi07WAALA", "cInoAAAAAAAA");
-  //        expect(positionRecord.checkers[0][25]).toEqual(1);
-  //        expect(positionRecord.checkers[1][0]).toEqual(1);
-  //    })
-  //});
-  //
-  //describe("PositionRecord.initializeFromXGId", function(){
-  //    var positionRecord;
-  //
-  //    beforeEach(function(){
-  //        positionRecord = new PositionRecord();
-  //    });
-  //
-  //    it("should initialize some middlegame position without errors", function(){
-  //        positionRecord.initializeFromXGId("-a-B--E-B-a-dDB--b-bcb----:1:1:-1:63:0:0:0:3:8");
-  //        expect(positionRecord.checkers[0][6]).toEqual(5);
-  //        expect(positionRecord.checkers[1][6]).toEqual(2);
-  //        expect(positionRecord.checkers[0][0]).toEqual(0);
-  //        expect(positionRecord.checkers[1][0]).toEqual(0);
-  //        expect(positionRecord.checkers[0][13]).toEqual(4);
-  //        expect(positionRecord.checkers[1][5]).toEqual(3);
-  //
-  //		expect(positionRecord.playerOnRoll).toEqual(1);
-  //		expect(positionRecord.cubeOwner).toEqual(0);
-  //		expect(positionRecord.cubeValue).toEqual(2);
-  //		expect(positionRecord.die1).toEqual(6);
-  //		expect(positionRecord.die2).toEqual(3);
-  //		expect(positionRecord.matchLength).toEqual(3);
-  //		expect(positionRecord.matchScore[0]).toEqual(0);
-  //		expect(positionRecord.matchScore[1]).toEqual(0);
-  //		expect(positionRecord.crawFord).toBeFalsy();
-  //    });
-  //});
-  //
-  //describe("PositionRecord.dissectMatchId", function(){
-  //    var positionRecord;
-  //
-  //    beforeEach(function(){
-  //        positionRecord = new PositionRecord();
-  //    });
-  //
-  //    it("should dissect moneygame matchid correctly", function(){
-  //        positionRecord.dissectMatchId("cIgfAAAAAAAA");
-  //        expect(positionRecord.playerOnRoll).toEqual(1);
-  //        expect(positionRecord.isCrawford).toBeFalsy();
-  //        expect(positionRecord.matchLength).toEqual(0);
-  //        expect(positionRecord.matchScore[0]).toEqual(0);
-  //        expect(positionRecord.matchScore[1]).toEqual(0);
-  //    });
-  //
-  //    it("should dissect match with player 1 on roll correctly", function(){
-  //		var positionRecord = new PositionRecord();
-  //        positionRecord.dissectMatchId("cIj/ABAAEAAA");
-  //		expect(positionRecord.decisionTurn).toEqual(1);
-  //        expect(positionRecord.playerOnRoll).toEqual(1);
-  //		expect(positionRecord.isCubeOffered).toBeFalsy();
-  //        expect(positionRecord.isCrawford).toBeFalsy();
-  //        expect(positionRecord.matchLength).toEqual(7);
-  //        expect(positionRecord.matchScore[0]).toEqual(1);
-  //        expect(positionRecord.matchScore[1]).toEqual(2);
-  //		expect(positionRecord.die1).toEqual(DIE_NONE);
-  //        expect(positionRecord.die2).toEqual(DIE_NONE);
-  //
-  //    });
-  //
-  //    it("should dissect match with player 1 having rolled 3-2 correctly", function(){
-  //        positionRecord.dissectMatchId("cInpAAAAAAAA");
-  //		expect(positionRecord.decisionTurn).toEqual(1);
-  //        expect(positionRecord.playerOnRoll).toEqual(1);
-  //        expect(positionRecord.isCrawford).toBeFalsy();
-  //        expect(positionRecord.matchLength).toEqual(7);
-  //        expect(positionRecord.matchScore[0]).toEqual(0);
-  //        expect(positionRecord.matchScore[1]).toEqual(0);
-  //        expect(positionRecord.die1).toEqual(3);
-  //        expect(positionRecord.die2).toEqual(2);
-  //    });
-  //});
-  //
-  //describe("PositionRecord.getPositionId", function(){
-  //
-  //    it("should show the correct Id for an empty position", function(){
-  //		var positionRecord = new PositionRecord();
-  //        expect(positionRecord.getPositionId()).toEqual("AAAAAAAAAAAAAA");
-  //    });
-  //
-  //	it("should show the correct Id for the initial position", function(){
-  //		var positionRecord = createInitialPosition();
-  //        expect(positionRecord.getPositionId()).toEqual("4HPwATDgc/ABMA");
-  //    });
-  //});
-  //
-  //describe("PositionRecord.getMatchId", function(){
-  //
-  //    it("should show the correct Id for a match with player 1 on roll", function(){
-  //		var positionRecord = new PositionRecord();
-  //		positionRecord.playerOnRoll = 1;
-  //		positionRecord.decisionTurn = 1;
-  //        positionRecord.isCrawford = false;
-  //        positionRecord.matchLength = 7;
-  //        positionRecord.matchScore[0] = 1;
-  //        positionRecord.matchScore[1] = 2;
-  //		positionRecord.gameState = 0;
-  //		positionRecord.cubeValue = 1;
-  //
-  //        expect(positionRecord.getMatchId()).toEqual("cIj/ABAAEAAA");
-  //    });
-  //});
-  //
-  //describe("PositionRecord.clone", function(){
-  //    var positionRecord;
-  //
-  //    beforeEach(function(){
-  //        positionRecord = new PositionRecord();
-  //    });
-  //
-  //    it("should create a new identical position", function(){
-  //        positionRecord.initializeFromId("4HPwATDgc/ABMA", "cIgfAAAAAAAA");
-  //
-  //        var clonedPosition = positionRecord.clone();
-  //        for (var player = 0; player < 2; player++) {
-  //            for (var point = 0; point < 26; point++) {
-  //			// "Difference for player " + player + " point " + point,
-  //                expect(positionRecord.checkers[player][point]).toEqual(clonedPosition.checkers[player][point]);
-  //            }
-  //        }
-  //
-  //        positionRecord.checkers[0][0] = 1;
-  //        expect(positionRecord.checkers[0][0]).toNotEqual(clonedPosition.checkers[0][0]);
-  //    });
-  //});
+    positionRecord.checkers(0)(6) should be(5)
+    positionRecord.checkers(1)(6) should be(5)
+    positionRecord.checkers(0)(0) should be(0)
+    positionRecord.checkers(1)(0) should be(0)
+    positionRecord.checkers(0)(24) should be(2)
+    positionRecord.checkers(1)(24) should be(2)
+
+    positionRecord.cubeValue should be(1)
+  }
+
+  "initializeFromId" should "initialize a middle game position without errors" in {
+    val positionRecord = PositionRecord.initializeFromId("sG3wABi07WAALA", "cInoAAAAAAAA")
+    positionRecord.checkers(0)(25) should be(1)
+    positionRecord.checkers(1)(0) should be(1)
+  }
+
+  "dissectMatchId" should "dissect moneygame matchid correctly" in {
+    val positionRecord = PositionRecord.dissectMatchId("cIgfAAAAAAAA");
+    positionRecord.playerOnRoll should be(1)
+    positionRecord.crawford should be(false)
+    positionRecord.matchLength should be(0)
+    positionRecord.matchScore(0) should be(0)
+    positionRecord.matchScore(1) should be(0)
+  }
+
+  "dissectMatchId" should "should dissect match with player 1 on roll correctly" in {
+    val positionRecord = PositionRecord.dissectMatchId("cIj/ABAAEAAA")
+    positionRecord.decisionTurn should be(1)
+    positionRecord.playerOnRoll should be(1)
+    positionRecord.cubeOffered should be(false)
+    positionRecord.crawford should be(false)
+    positionRecord.matchLength should be(7)
+    positionRecord.matchScore(0) should be(1)
+    positionRecord.matchScore(1) should be(2)
+    positionRecord.die1 should be(PositionRecord.DIE_NONE)
+    positionRecord.die2 should be(PositionRecord.DIE_NONE)
+  }
+
+  "dissectMatchId" should "dissect match with player 1 having rolled 3-2 correctly" in {
+    val positionRecord = PositionRecord.dissectMatchId("cInpAAAAAAAA")
+    positionRecord.decisionTurn should be(1)
+    positionRecord.playerOnRoll should be(1)
+    positionRecord.crawford should be(false)
+    positionRecord.matchLength should be(7)
+    positionRecord.matchScore(0) should be(0)
+    positionRecord.matchScore(1) should be(0)
+    positionRecord.die1 should be(3)
+    positionRecord.die2 should be(2)
+  }
+
+  "getPositionId" should "show the correct Id for an empty position" in {
+    val positionRecord = PositionRecord(PositionRecord.emptyCheckers, 0, 0, 0, false, 0, 0, false, 0, 0, 0, 0, Array(0, 0))
+    positionRecord.getPositionId() should be("AAAAAAAAAAAAAA")
+  }
+
+  "getPositionId" should "show return the original positionId that is was imported from" in {
+    var positionRecord = PositionRecord.initializeFromId("sG3wABi07WAALA", "cInoAAAAAAAA")
+    positionRecord.getPositionId() should be("sG3wABi07WAALA")
+
+    positionRecord = PositionRecord.initializeFromId("4HPwATDgc/ABMA", "cIgfAAAAAAAA")
+    positionRecord.getPositionId() should be("4HPwATDgc/ABMA")
+  }
+
+  "getMatchId" should "show the correct Id for a match with player 1 on roll" in {
+    val positionRecord = PositionRecord.emptyRecord.copy(
+      playerOnRoll = 1,
+      decisionTurn = 1,
+      crawford = false,
+      matchLength = 7,
+      matchScore = Array(1, 2),
+      gameState = 0,
+      cubeValue = 1)
+
+    positionRecord.getMatchId() should be("cIj/ABAAEAAA")
+  }
+
+  "getMatchId" should "show return the original matchId that is was imported from" in {
+    var positionRecord = PositionRecord.initializeFromId("sG3wABi07WAALA", "cInoAAAAAAAA")
+    positionRecord.getMatchId() should be("cInoAAAAAAAA")
+
+    positionRecord = PositionRecord.initializeFromId("4HPwATDgc/ABMA", "cIgfAAAAAAAA")
+    positionRecord.getMatchId() should be("cIgfAAAAAAAA")
+  }
 }

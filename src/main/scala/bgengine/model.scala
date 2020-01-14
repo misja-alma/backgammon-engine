@@ -133,7 +133,7 @@ package object model {
     }
 
     // 2 moves are same when:
-    // - their list of halfmoves contain the same elements
+    // - their lists of halfmoves contain the same elements, or
     // - non-doubles: moves are for 1 checker and order is reversed, but only if there is no hit halfway in either move. Note that in bearoffs, this can also mean that a single halfmove equals two halfmoves.
     override def equals(obj: Any): Boolean = {
       obj.isInstanceOf[Move] && {
