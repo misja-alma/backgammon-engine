@@ -59,15 +59,15 @@ class PositionRecordTest extends FlatSpec with Matchers {
 
   "getPositionId" should "show the correct Id for an empty position" in {
     val positionRecord = PositionRecord(PositionRecord.emptyCheckers, 0, 0, 0, false, 0, 0, false, 0, 0, 0, 0, Array(0, 0))
-    positionRecord.getPositionId() should be("AAAAAAAAAAAAAA")
+    positionRecord.getPositionId should be("AAAAAAAAAAAAAA")
   }
 
   "getPositionId" should "show return the original positionId that is was imported from" in {
     var positionRecord = PositionRecord.initializeFromId("sG3wABi07WAALA", "cInoAAAAAAAA")
-    positionRecord.getPositionId() should be("sG3wABi07WAALA")
+    positionRecord.getPositionId should be("sG3wABi07WAALA")
 
     positionRecord = PositionRecord.initializeFromId("4HPwATDgc/ABMA", "cIgfAAAAAAAA")
-    positionRecord.getPositionId() should be("4HPwATDgc/ABMA")
+    positionRecord.getPositionId should be("4HPwATDgc/ABMA")
   }
 
   "getMatchId" should "show the correct Id for a match with player 1 on roll" in {
@@ -80,14 +80,14 @@ class PositionRecordTest extends FlatSpec with Matchers {
       gameState = 0,
       cubeValue = 1)
 
-    positionRecord.getMatchId() should be("cIj/ABAAEAAA")
+    positionRecord.getMatchId should be("cIj/ABAAEAAA")
   }
 
   "getMatchId" should "show return the original matchId that is was imported from" in {
     var positionRecord = PositionRecord.initializeFromId("sG3wABi07WAALA", "cInoAAAAAAAA")
-    positionRecord.getMatchId() should be("cInoAAAAAAAA")
+    positionRecord.getMatchId should be("cInoAAAAAAAA")
 
     positionRecord = PositionRecord.initializeFromId("4HPwATDgc/ABMA", "cIgfAAAAAAAA")
-    positionRecord.getMatchId() should be("cIgfAAAAAAAA")
+    positionRecord.getMatchId should be("cIgfAAAAAAAA")
   }
 }

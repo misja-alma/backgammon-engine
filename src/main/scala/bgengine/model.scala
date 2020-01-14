@@ -1,5 +1,7 @@
 package bgengine
 
+import scala.collection.{MultiSet, mutable}
+
 package object model {
   import bgengine.model.Player.Player
 
@@ -31,8 +33,8 @@ package object model {
     def fromString(s: String): Position = {
       val lines = s.split("\n")
       Position(
-        lines(0).drop(7).split(",").map(_.toInt),
-        lines(1).drop(7).split(",").map(_.toInt),
+        MultiSet.from(lines(0).drop(7).split(",").map(_.toInt)),
+        MultiSet.from(lines(1).drop(7).split(",").map(_.toInt)),
         Player.withName(lines(3).split(" ").head),
         CubePosition.fromString(lines(2))
       )
@@ -55,14 +57,12 @@ package object model {
       }
     }
 
-    def replaceValue(xs: Seq[Int], from: Int, to: Int): Seq[Int] =
-      xs match {
-        case Nil     => Nil
-        case y +: ys => if (y == from) to +: ys else y +: replaceValue(ys, from, to)
-      }
+    def replaceValue(xs: MultiSet[Int], from: Int, to: Int): MultiSet[Int] = {
+      mutable.MultiSet.from(xs).subtractOne(from).addOne(to)
+    }
   }
 
-  case class Position(whiteCheckers: Seq[Int], blackCheckers: Seq[Int], turn: Player, cubePosition: CubePosition) {
+  case class Position(whiteCheckers: MultiSet[Int], blackCheckers: MultiSet[Int], turn: Player, cubePosition: CubePosition) {
     /**
      * Example:
      * white: 6,6,6,6,6,8,8,13,13,13,13,13,13,24,24
@@ -71,27 +71,24 @@ package object model {
      * Nobody is on roll.
      */
     override def toString: String =
-      "white: " + whiteCheckers.sorted.mkString(",") + "\n" +
-        "black: " + blackCheckers.sorted.mkString(",") + "\n" +
-        cubePosition + "\n" +
-        turn + " is on roll."
+      "white: " + whiteCheckers.toList.sorted.mkString(",") + "\n" +
+      "black: " + blackCheckers.toList.sorted.mkString(",") + "\n" +
+      cubePosition + "\n" +
+      turn + " is on roll."
 
-    def nrCheckersOn(point: Int, p: Player): Int = {
-      val checkersToCheck = p match {
+    def checkersForPlayer(p: Player): MultiSet[Int] =
+      p match {
         case Player.White => whiteCheckers
         case Player.Black => blackCheckers
         case Player.Nobody => sys.error("Invalid argument: " + p)
       }
-      checkersToCheck.count(_ == point)
+
+    def nrCheckersOn(point: Int, p: Player): Int = {
+      checkersForPlayer(p).get(point)
     }
 
     def highestOccupiedPoint(p: Player): Int = {
-      val checkersToCheck = p match {
-        case Player.White => whiteCheckers
-        case Player.Black => blackCheckers
-        case Player.Nobody => sys.error("Invalid argument: " + p)
-      }
-      checkersToCheck.max
+      checkersForPlayer(p).max
     }
   }
 

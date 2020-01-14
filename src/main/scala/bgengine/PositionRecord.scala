@@ -18,7 +18,7 @@ object PositionRecord {
 
   // tables used by match- and positionId code
   val base64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-  val positions = Seq(2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 0, 1, 22, 23, 8, 9, 10, 11, 16, 17, 18, 19, 20, 21).toArray
+  val positions = Array(2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 0, 1, 22, 23, 8, 9, 10, 11, 16, 17, 18, 19, 20, 21)
 
   def emptyCheckers: Array[Array[Int]] = Array.fill(2, 26)(0)
 
@@ -34,10 +34,10 @@ object PositionRecord {
   def bitSubString(bitString: Array[Int], start: Int, end: Int): Int = {
     var e = end - 1
 
-    var result = bitString(e);
+    var result = bitString(e)
     while (start < e) {
       e = e - 1
-      result = 2 * result + bitString(e);
+      result = 2 * result + bitString(e)
     }
 
     result
@@ -47,7 +47,7 @@ object PositionRecord {
     var pos = start
     var mask = 1
     while (pos <= (end - 1)) {
-      bitString(pos) = (value & mask) / mask;
+      bitString(pos) = (value & mask) / mask
       mask = mask * 2
       pos = pos + 1
     }
@@ -55,8 +55,7 @@ object PositionRecord {
 
   def base64ToBits(s: String, length: Int): Array[Int] = {
     // first transform the match id into a bit array
-    var bits = new Array[Int](s.length * 6 + 21) // TODO check
-    var bytes = s //stringToBytes(s);
+    val bits = new Array[Int](s.length * 6 + 21)
 
     for (
       c <- 0 until (s.length / 4 + 1)
@@ -64,16 +63,16 @@ object PositionRecord {
       for {
         b <- 0 until 4
         index = c * 4 + b
-        if index < bytes.length
+        if index < s.length
       } {
-        var ch = base64.indexOf(bytes(index)) // remove 'base 64' encoding
+        val ch = base64.indexOf(s(index)) // remove 'base 64' encoding
         var mask = 1
         // every character represents 6 bits.      
         for (
           bit <- 0 until 6
         ) {
           // find the position at which this bit will be located
-          var pos = c * 24 + positions(b * 6 + bit)
+          val pos = c * 24 + positions(b * 6 + bit)
           bits(pos) = (ch & mask) / mask
           mask = mask * 2 // ready for the next bit
         }
@@ -96,17 +95,16 @@ object PositionRecord {
     // this.setDefaultValues();
 
     // first we need to know if player zero or player one is on roll. So dissect the matchId first
-    val result = dissectMatchId(matchId);
+    val result = dissectMatchId(matchId)
 
     // dissect the position id
-    var bytes = posId // stringToBytes(posId);
     var nrPlayersCounted = 0
     var player = result.playerOnRoll
     var point = 1
     var nrOnPoint = 0
     var ready = false
     // create a normalized bitstring first
-    var bits = base64ToBits(posId, 160)
+    val bits = base64ToBits(posId, 160)
 
     for {
       c <- 0 until bits.length
@@ -128,17 +126,14 @@ object PositionRecord {
 
           if (nrPlayersCounted == 2) {
             ready = true
-          }
-          else {
+          } else {
             player = (~player) & 1 // player := not player
             point = 1
           }
-        }
-        else {
+        } else {
           point = point + 1
         }
-      }
-      else {
+      } else {
         nrOnPoint = nrOnPoint + 1
       }
     }
@@ -152,7 +147,7 @@ object PositionRecord {
     // The first character in the string holds bit 2..7; the second bit 0..1 and 12..15; etc.
 
     // first transform the match id into a bit array
-    var bits = base64ToBits(matchId, 72)
+    val bits = base64ToBits(matchId, 72)
 
     val cubeValue = Math.pow(2, bitSubString(bits, 0, 4)).toInt
     val cubeOwner = bitSubString(bits, 4, 6)
@@ -210,7 +205,8 @@ object PositionRecord {
   }
 }
 
-case class PositionRecord(checkers: Array[Array[Int]], cubeValue: Int, cubeOwner: Int, playerOnRoll: Int, crawford: Boolean, gameState: Int, decisionTurn: Int, cubeOffered: Boolean, resignation: Int,
+case class PositionRecord(checkers: Array[Array[Int]], cubeValue: Int, cubeOwner: Int, playerOnRoll: Int,
+                          crawford: Boolean, gameState: Int, decisionTurn: Int, cubeOffered: Boolean, resignation: Int,
                           die1: Int, die2: Int, matchLength: Int, matchScore: Array[Int]) {
 
   import PositionRecord._
@@ -219,46 +215,41 @@ case class PositionRecord(checkers: Array[Array[Int]], cubeValue: Int, cubeOwner
    *
    * @return the gnu position id
    */
-  def getPositionId(): String = {
-    val bits = new Array[Int](14 * 8) // TODO check
+  def getPositionId: String = {
+    val bits = new Array[Int](14 * 8)
 
     // make a long bit string
     var player = playerOnRoll
     var pos = 0
     for (
-      nrPlayers <- 0 until 2
+      _ <- 0 to 1
     ) {
-      var nrCheckersSoFar = 0;
       for (
-        point <- 1 until 26
+        point <- 1 to 25
       ) {
-        val nr = checkers(player)(point);
+        val nr = checkers(player)(point)
         for (
-          t <- 0 until nr
+          _ <- 0 until nr
         ) {
-          nrCheckersSoFar = nrCheckersSoFar + 1
-          if (nrCheckersSoFar > 15) {
-            sys.error("Player " + nrPlayers + " has more than 15 checkers")
-          }
           bits(pos) = 1
           pos = pos + 1
         }
         bits(pos) = 0
         pos = pos + 1
       }
-      player = (~player) & 1; // player := not player
+      player = (~player) & 1 // player := not player
     }
     // turn it into characters
     makeBase64String(bits, 14)
-  };
+  }
 
   /**
    * @return the 2-log of the cube
    */
-  def getTwoLogOfCube(): Int = {
+  def getTwoLogOfCube: Int = {
     var twoLog = 0
     var power = 1
-    while (power < this.cubeValue) {
+    while (power < cubeValue) {
       power = power * 2
       twoLog = twoLog + 1
     }
@@ -268,10 +259,10 @@ case class PositionRecord(checkers: Array[Array[Int]], cubeValue: Int, cubeOwner
   /**
    * @return the gnu match id
    */
-  def getMatchId(): String = {
+  def getMatchId: String = {
     val bits = new Array[Int](66)
 
-    putIntoBitString(bits, getTwoLogOfCube(), 0, 4)
+    putIntoBitString(bits, getTwoLogOfCube, 0, 4)
     putIntoBitString(bits, cubeOwner, 4, 6)
     putIntoBitString(bits, playerOnRoll, 6, 7)
     putIntoBitString(bits, if (crawford) 1 else 0, 7, 8)
@@ -286,19 +277,12 @@ case class PositionRecord(checkers: Array[Array[Int]], cubeValue: Int, cubeOwner
     putIntoBitString(bits, matchScore(1), 51, 66)
 
     makeBase64String(bits, 12)
-  };
+  }
 
   def makeBase64String(bitString: Array[Int], length: Int): String = {
-    val result = new Array[Int](16) // TODO check. This seems to have to be the final length, however in between the length can go up to 16 ..
-
-    for (
-      i <- 0 until length
-    ) {
-      result(i) = 0
-    }
+    val result = Array.fill(16)(0)
 
     //  move every bit to its place
-    var pos = 0
     for (
       c <- 0 until 4
     ) {
@@ -316,24 +300,15 @@ case class PositionRecord(checkers: Array[Array[Int]], cubeValue: Int, cubeOwner
     }
 
     // base 64 encoding
-    val res = new Array[Char](result.length)
-
-    for (
-      i <- 0 until result.length
-    ) {
-      res(i) = base64.charAt(result(i))
-    }
-
-    res.mkString("").take(length)
+    result.take(length).map(base64.charAt).mkString
   }
 
   def setBit(byteStr: Array[Int], index: Int, bitPos: Int, value: Int): Unit = {
     val mask = Math.pow(2, bitPos).toInt
     if (value == 1) {
       byteStr(index) = byteStr(index) | mask
-    }
-    else {
+    } else {
       byteStr(index) = byteStr(index) & (~mask)
     }
-  };
+  }
 }
