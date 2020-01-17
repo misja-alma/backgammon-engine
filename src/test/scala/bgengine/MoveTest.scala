@@ -26,7 +26,7 @@ class MoveTest extends FlatSpec with Matchers {
     Move(Player.White, Seq(HalfMove(1, 0, false), HalfMove(1, 0, false))) should not be(Move(Player.White, Seq(HalfMove(1, 0, false))))
   }
 
-  "equals" should "return false also when the order of the halfmoves differs but a checker is hit half way" in {
+  it should "return false also when the order of the halfmoves differs but a checker is hit half way" in {
     Move(Player.White, Seq(HalfMove(24, 23, true), HalfMove(23, 21, false))) should not be(Move(Player.White, Seq(HalfMove(24, 22, false), HalfMove(22, 21, false))))
     Move(Player.White, Seq(HalfMove(24, 23, true), HalfMove(23, 21, false))) should not be(Move(Player.White, Seq(HalfMove(24, 22, true), HalfMove(22, 21, false))))
     Move(Player.White, Seq(HalfMove(24, 23, false), HalfMove(23, 21, false))) should not be(Move(Player.White, Seq(HalfMove(24, 22, true), HalfMove(22, 21, false))))

@@ -40,6 +40,9 @@ package object model {
       )
     }
 
+    def applyMove(move: Move, position: Position): Position =
+      move.halfMoves.foldLeft(position){ case (p, halfMove) => applyHalfMove(halfMove, p) }
+
     def applyHalfMove(halfMove: HalfMove, position: Position): Position = {
       val newPos = if (halfMove.isHit) {
         moveChecker(Player.inverse(position.turn), 25 - halfMove.to, 25, position)
@@ -63,6 +66,10 @@ package object model {
   }
 
   case class Position(whiteCheckers: MultiSet[Int], blackCheckers: MultiSet[Int], turn: Player, cubePosition: CubePosition) {
+    import Player._
+
+    lazy val positionId = toPositionRecord.getPositionId
+
     /**
      * Example:
      * white: 6,6,6,6,6,8,8,13,13,13,13,13,13,24,24
@@ -89,6 +96,29 @@ package object model {
 
     def highestOccupiedPoint(p: Player): Int = {
       checkersForPlayer(p).max
+    }
+
+    def toPositionRecord: PositionRecord = {
+      def convertCheckers: Array[Array[Int]] =
+        Array(blackCheckers.toArray, whiteCheckers.toArray)
+
+      def convertPlayerOnRoll = turn match {
+        case White => 1
+        case Black => 0
+        case Nobody => 0 // Note: this is captured in PositionRecord's decisionturn
+      }
+
+      def convertCubeOwner = cubePosition.owner match {
+        case White => 1
+        case Black => 0
+        case Nobody => PositionRecord.CENTERED_CUBE
+      }
+
+      PositionRecord.emptyRecord.copy(
+        checkers = convertCheckers,
+        playerOnRoll = convertPlayerOnRoll,
+        cubeOwner = convertCubeOwner,
+        cubeValue = cubePosition.height)
     }
   }
 

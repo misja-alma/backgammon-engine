@@ -17,7 +17,7 @@ class PositionRecordTest extends FlatSpec with Matchers {
     positionRecord.cubeValue should be(1)
   }
 
-  "initializeFromId" should "initialize a middle game position without errors" in {
+  it should "initialize a middle game position without errors" in {
     val positionRecord = PositionRecord.initializeFromId("sG3wABi07WAALA", "cInoAAAAAAAA")
     positionRecord.checkers(0)(25) should be(1)
     positionRecord.checkers(1)(0) should be(1)
@@ -32,7 +32,7 @@ class PositionRecordTest extends FlatSpec with Matchers {
     positionRecord.matchScore(1) should be(0)
   }
 
-  "dissectMatchId" should "should dissect match with player 1 on roll correctly" in {
+  it should "should dissect match with player 1 on roll correctly" in {
     val positionRecord = PositionRecord.dissectMatchId("cIj/ABAAEAAA")
     positionRecord.decisionTurn should be(1)
     positionRecord.playerOnRoll should be(1)
@@ -45,7 +45,7 @@ class PositionRecordTest extends FlatSpec with Matchers {
     positionRecord.die2 should be(PositionRecord.DIE_NONE)
   }
 
-  "dissectMatchId" should "dissect match with player 1 having rolled 3-2 correctly" in {
+  it should "dissect match with player 1 having rolled 3-2 correctly" in {
     val positionRecord = PositionRecord.dissectMatchId("cInpAAAAAAAA")
     positionRecord.decisionTurn should be(1)
     positionRecord.playerOnRoll should be(1)
@@ -62,7 +62,7 @@ class PositionRecordTest extends FlatSpec with Matchers {
     positionRecord.getPositionId should be("AAAAAAAAAAAAAA")
   }
 
-  "getPositionId" should "show return the original positionId that is was imported from" in {
+  it should "show return the original positionId that is was imported from" in {
     var positionRecord = PositionRecord.initializeFromId("sG3wABi07WAALA", "cInoAAAAAAAA")
     positionRecord.getPositionId should be("sG3wABi07WAALA")
 
@@ -83,7 +83,7 @@ class PositionRecordTest extends FlatSpec with Matchers {
     positionRecord.getMatchId should be("cIj/ABAAEAAA")
   }
 
-  "getMatchId" should "show return the original matchId that is was imported from" in {
+  it should "show return the original matchId that is was imported from" in {
     var positionRecord = PositionRecord.initializeFromId("sG3wABi07WAALA", "cInoAAAAAAAA")
     positionRecord.getMatchId should be("cInoAAAAAAAA")
 
