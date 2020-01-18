@@ -102,13 +102,19 @@ package object model {
       def convertCheckers: Array[Array[Int]] =
         Array(blackCheckers.toArray, whiteCheckers.toArray)
 
-      def convertPlayerOnRoll = turn match {
+      def convertPlayerOnRoll: Int = turn match {
         case White => 1
         case Black => 0
-        case Nobody => 0 // Note: this is captured in PositionRecord's decisionturn
+        case Nobody => 0 // Note: this is captured in PositionRecord's decisionTurn
       }
 
-      def convertCubeOwner = cubePosition.owner match {
+      def convertDecisionTurn: Int = turn match {
+        case White => 1
+        case Black => 0
+        case Nobody => 3 // TODO CHECK, no idea if this is correct
+      }
+
+      def convertCubeOwner: Int = cubePosition.owner match {
         case White => 1
         case Black => 0
         case Nobody => PositionRecord.CENTERED_CUBE
@@ -118,7 +124,8 @@ package object model {
         checkers = convertCheckers,
         playerOnRoll = convertPlayerOnRoll,
         cubeOwner = convertCubeOwner,
-        cubeValue = cubePosition.height)
+        cubeValue = cubePosition.height,
+        decisionTurn = convertDecisionTurn)
     }
   }
 

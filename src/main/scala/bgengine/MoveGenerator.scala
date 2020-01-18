@@ -18,8 +18,7 @@ object MoveGenerator {
 
     val dies = if (die1 == die2) Seq(die1, die1, die1, die1) else Seq(die1, die2)
     val candidates = if (die1 == die2) recurseGenerateMoves(position, dies) else recurseGenerateMoves(position, dies) ++ recurseGenerateMoves(position, dies.reverse)
-    val withoutInvalids = removeInvalids(dies)(candidates)
-    removeDuplicates(withoutInvalids)
+    (removeInvalids(dies) _ andThen removeDuplicates) (candidates)
   }
 
   def generateHalfMoves(position: Position, die: Int): Seq[HalfMove] = {
@@ -70,10 +69,9 @@ object MoveGenerator {
         }
       }
     }
-
   }
 
   def removeDuplicates(moves: Seq[Move]): Set[Move] = {
-    moves.toSet
+    moves.toSet   // Relies on the equals method in Move to appropriately recognize duplicates.
   }
 }
