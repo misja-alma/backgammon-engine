@@ -40,6 +40,12 @@ package object model {
       )
     }
 
+    def fromGnuIds(posId: String, matchId: String): Position = {
+      val positionRecord = PositionRecord.initializeFromId(posId, matchId)
+      // TODO convert
+      ???
+    }
+
     def applyMove(move: Move, position: Position): Position =
       move.halfMoves.foldLeft(position){ case (p, halfMove) => applyHalfMove(halfMove, p) }
 
@@ -68,6 +74,7 @@ package object model {
   case class Position(whiteCheckers: MultiSet[Int], blackCheckers: MultiSet[Int], turn: Player, cubePosition: CubePosition) {
     import Player._
 
+    // TODO change to gnuId, concatenate posId and matchId with special delim.
     lazy val positionId = toPositionRecord.getPositionId
 
     /**

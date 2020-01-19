@@ -23,6 +23,7 @@ object DatabaseBuilder {
   // Finally check if we reached the max size of the db. If not, generate new position(s) which are not in the db already, repeat.
   //
   // TODO problem: the gnu positionId does not contain the cube! So for now this builder works only for cubeless simulations.
+  // TODO problem 2: the positionId doesn't give the player on roll! So we need to store both position- and matchId. Maybe concatenate with special delimiter?
 
   private lazy val nonDoubles = for {
     d1 <- 1 to 5
