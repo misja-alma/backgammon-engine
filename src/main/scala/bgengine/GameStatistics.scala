@@ -1,9 +1,29 @@
 package bgengine
 
-trait GameStatistics {
+trait GameStatistics[G <: GameStatistics[G]] { this: G =>
+  /**
+   * Defined as the total accumulated equity for the player on roll.
+   */
   def equity: Double
 
-  def add(s: GameStatistics): GameStatistics
+  def switchTurn: G
 
-  def multiply(x: Double): GameStatistics
+  def add(s: G): G
+
+  def multiplyWeight(x: Double): G
 }
+
+object GameStatistics {
+  def aggregate[G <: GameStatistics[G]](stats: Seq[G]): G = stats.reduce( _ add _ )
+}
+
+case class SimpleGameStatistics(equity: Double, nrGames: Int) extends GameStatistics[SimpleGameStatistics] {
+
+  override def switchTurn: SimpleGameStatistics = copy(equity = -equity)
+
+  override def add(s: SimpleGameStatistics): SimpleGameStatistics =
+    SimpleGameStatistics(equity + s.equity, nrGames + s.nrGames)
+
+  override def multiplyWeight(x: Double): SimpleGameStatistics = SimpleGameStatistics(equity * x, Math.round(nrGames * x).toInt)
+}
+

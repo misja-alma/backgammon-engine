@@ -99,9 +99,12 @@ package object model {
     }
 
     def toPositionRecord: PositionRecord = {
-      def convertCheckers: Array[Array[Int]] =
-        Array(blackCheckers.toArray, whiteCheckers.toArray)
+      def convertAllCheckers: Array[Array[Int]] =
+        Array(convertCheckers(blackCheckers), convertCheckers(whiteCheckers))
 
+      def convertCheckers(cs: MultiSet[Int]): Array[Int] =
+        (0 to 25).map(cs.get).toArray
+      
       def convertPlayerOnRoll: Int = turn match {
         case White => 1
         case Black => 0
@@ -121,7 +124,7 @@ package object model {
       }
 
       PositionRecord.emptyRecord.copy(
-        checkers = convertCheckers,
+        checkers = convertAllCheckers,
         playerOnRoll = convertPlayerOnRoll,
         cubeOwner = convertCubeOwner,
         cubeValue = cubePosition.height,
