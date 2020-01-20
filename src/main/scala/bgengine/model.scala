@@ -131,6 +131,10 @@ package object model {
       checkersForPlayer(p).max
     }
 
+    def lowestOccupiedPoint(p: Player): Int = {
+      checkersForPlayer(p).min
+    }
+
     def toPositionRecord: PositionRecord = {
       def convertAllCheckers: Array[Array[Int]] =
         Array(convertCheckers(blackCheckers), convertCheckers(whiteCheckers))

@@ -35,19 +35,22 @@ object DatabaseBuilder {
                                     startingPosition: Position,
                                     generator: Position => Seq[Position],
                                     database: collection.mutable.Map[String, G],
-                                    maxDbSize: Int): Unit = {
+                                    maxDbSize: Int): collection.mutable.Map[String, G] = {
     if (database.size < maxDbSize) {
       val positionId = startingPosition.gnuId
 
       if (!database.contains(positionId)) {
-        val statsOfPos = evaluator(startingPosition).getOrElse(evaluate1ply(startingPosition, evaluator, database).switchTurn)
+        val statsOfPos = evaluator(startingPosition).getOrElse(evaluate1ply(startingPosition, evaluator, database))
         database.put(positionId, statsOfPos)
-      }
 
-      generator(startingPosition).foreach { p =>
-        build(evaluator, p, generator, database, maxDbSize) // TODO would be better not to use recursion
+        // Also do not generate new positions if the pos is known already, to avoid dead loops.
+        generator(startingPosition).foreach { p =>
+          build(evaluator, p, generator, database, maxDbSize) // TODO would be better not to use recursion
+        }
       }
     }
+
+    database
   }
 
   def evaluate1ply[G <: GameStatistics[G]](position: Position,
