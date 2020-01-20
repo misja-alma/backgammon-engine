@@ -40,10 +40,34 @@ package object model {
       )
     }
 
-    def fromGnuIds(posId: String, matchId: String): Position = {
+    def fromPositionRecord(positionRecord: PositionRecord): Position = {
+      def convertCheckers(cs: Array[Int]): mutable.MultiSet[Int] =
+        cs.indices.foldLeft(mutable.MultiSet.empty[Int]){ case (s, i) => s.addAll(Array.fill(cs(i))(i).toSeq) }
+
+      def convertTurn(playerOnRoll: Int, gameState: Int): Player = playerOnRoll match {
+        case 0 => if (gameState == PositionRecord.GAMESTATE_NOGAMESTARTED) Player.Nobody else Player.Black
+        case 1 => Player.White
+        case x => sys.error (s"Can't convert gnu playerOnRoll value: $x")
+      }
+
+      def convertCubePosition(cubeOwner: Int, cubeValue: Int): CubePosition = cubeOwner match {
+        case 0 => CubePosition(Player.Black, cubeValue)
+        case 1 => CubePosition(Player.White, cubeValue)
+        case PositionRecord.CENTERED_CUBE => CubePosition(Player.Nobody, cubeValue)
+      }
+
+      Position(
+        convertCheckers(positionRecord.checkers(1)),
+        convertCheckers(positionRecord.checkers(0)),
+        convertTurn(positionRecord.playerOnRoll, positionRecord.gameState),
+        convertCubePosition(positionRecord.cubeOwner, positionRecord.cubeValue)
+      )
+    }
+
+    def fromGnuId(gnuId: String): Position = {
+      val Array(matchId, posId) = gnuId.split(":")
       val positionRecord = PositionRecord.initializeFromId(posId, matchId)
-      // TODO convert
-      ???
+      fromPositionRecord(positionRecord)
     }
 
     def applyMove(move: Move, position: Position): Position =
@@ -74,8 +98,10 @@ package object model {
   case class Position(whiteCheckers: MultiSet[Int], blackCheckers: MultiSet[Int], turn: Player, cubePosition: CubePosition) {
     import Player._
 
-    // TODO change to gnuId, concatenate posId and matchId with special delim.
-    lazy val positionId = toPositionRecord.getPositionId
+    lazy val gnuId = {
+      val rec = toPositionRecord
+      rec.getMatchId + ":" + rec.getPositionId
+    }
 
     /**
      * Example:
@@ -115,13 +141,13 @@ package object model {
       def convertPlayerOnRoll: Int = turn match {
         case White => 1
         case Black => 0
-        case Nobody => 0 // Note: this is captured in PositionRecord's decisionTurn
+        case Nobody => 0 // Note: this is captured in PositionRecord's gameState
       }
 
       def convertDecisionTurn: Int = turn match {
         case White => 1
         case Black => 0
-        case Nobody => 3 // TODO CHECK, no idea if this is correct
+        case Nobody => 0 // Note: this is captured in PositionRecord's gameState
       }
 
       def convertCubeOwner: Int = cubePosition.owner match {
@@ -130,12 +156,16 @@ package object model {
         case Nobody => PositionRecord.CENTERED_CUBE
       }
 
+      def convertGameState: Int =
+        if (turn == Player.Nobody) PositionRecord.GAMESTATE_NOGAMESTARTED else PositionRecord.GAMESTATE_PLAYING // TODO we don't cover finished games (yet?)
+
       PositionRecord.emptyRecord.copy(
         checkers = convertAllCheckers,
         playerOnRoll = convertPlayerOnRoll,
         cubeOwner = convertCubeOwner,
         cubeValue = cubePosition.height,
-        decisionTurn = convertDecisionTurn)
+        decisionTurn = convertDecisionTurn,
+        gameState = convertGameState)
     }
   }
 

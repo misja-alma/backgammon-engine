@@ -21,9 +21,6 @@ object DatabaseBuilder {
   // Note that there is a special case when there are only no-moves, in that case we cannot calculate the equity.
   // The final equity will be stored as a new position in the db, the positionId string is the key. Statistics can optionally be stored with it as well.
   // Finally check if we reached the max size of the db. If not, generate new position(s) which are not in the db already, repeat.
-  //
-  // TODO problem: the gnu positionId does not contain the cube! So for now this builder works only for cubeless simulations.
-  // TODO problem 2: the positionId doesn't give the player on roll! So we need to store both position- and matchId. Maybe concatenate with special delimiter?
 
   private lazy val nonDoubles = for {
     d1 <- 1 to 5
@@ -40,7 +37,7 @@ object DatabaseBuilder {
                                     database: collection.mutable.Map[String, G],
                                     maxDbSize: Int): Unit = {
     if (database.size < maxDbSize) {
-      val positionId = startingPosition.positionId
+      val positionId = startingPosition.gnuId
 
       if (!database.contains(positionId)) {
         val statsOfPos = evaluator(startingPosition).getOrElse(evaluate1ply(startingPosition, evaluator, database).switchTurn)
@@ -63,7 +60,7 @@ object DatabaseBuilder {
     val weightedEqs = weightedDice.map { case Seq(w, die1, die2) =>
       val statsAfterBestMove = MoveGenerator.generateMoves(position, die1, die2).map { m =>
         val newPos = Position.applyMove(m, position)
-        val newPosId = newPos.positionId
+        val newPosId = newPos.gnuId
         database.getOrElse(newPosId, evaluator(newPos).getOrElse(sys.error(s"Cannot evaluate position $newPosId")))
       }.maxBy(_.equity)
       (w, statsAfterBestMove.multiplyWeight(w))
