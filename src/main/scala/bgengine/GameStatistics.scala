@@ -17,13 +17,13 @@ object GameStatistics {
   def aggregate[G <: GameStatistics[G]](stats: Seq[G]): G = stats.reduce( _ add _ )
 }
 
-case class SimpleGameStatistics(equity: Double, nrGames: Int) extends GameStatistics[SimpleGameStatistics] {
+case class SimpleGameStatistics(equity: Double) extends GameStatistics[SimpleGameStatistics] {
 
   override def switchTurn: SimpleGameStatistics = copy(equity = -equity)
 
   override def add(s: SimpleGameStatistics): SimpleGameStatistics =
-    SimpleGameStatistics(equity + s.equity, nrGames + s.nrGames)
+    SimpleGameStatistics(equity + s.equity)
 
-  override def multiplyWeight(x: Double): SimpleGameStatistics = SimpleGameStatistics(equity * x, Math.round(nrGames * x).toInt)
+  override def multiplyWeight(x: Double): SimpleGameStatistics = SimpleGameStatistics(equity * x)
 }
 

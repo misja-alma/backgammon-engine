@@ -70,6 +70,8 @@ package object model {
       fromPositionRecord(positionRecord)
     }
 
+    def switchTurn(position: Position): Position = position.copy(turn = Player.inverse(position.turn))
+
     def applyMove(move: Move, position: Position): Position =
       move.halfMoves.foldLeft(position){ case (p, halfMove) => applyHalfMove(halfMove, p) }
 

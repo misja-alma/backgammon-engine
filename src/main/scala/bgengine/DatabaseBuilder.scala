@@ -2,6 +2,8 @@ package bgengine
 
 import bgengine.model.Position
 
+import scala.collection.mutable
+
 object DatabaseBuilder {
   // Use this builder when there is no selector for the best move available, so we can only evaluate by backtracking.
   // Needs:
@@ -36,17 +38,20 @@ object DatabaseBuilder {
                                     generator: Position => Seq[Position],
                                     database: collection.mutable.Map[String, G],
                                     maxDbSize: Int): collection.mutable.Map[String, G] = {
-    if (database.size < maxDbSize) {
-      val positionId = startingPosition.gnuId
+    val queue = new mutable.Queue[Position]()
+    queue += startingPosition
+
+    while (database.size < maxDbSize && queue.nonEmpty) {
+      val nextPos = queue.dequeue()
+      val positionId = nextPos.gnuId
 
       if (!database.contains(positionId)) {
-        val statsOfPos = evaluator(startingPosition).getOrElse(evaluate1ply(startingPosition, evaluator, database))
+        val statsOfPos = evaluator(nextPos).getOrElse(evaluate1ply(nextPos, evaluator, database))
         database.put(positionId, statsOfPos)
 
-        // Also do not generate new positions if the pos is known already, to avoid dead loops.
-        generator(startingPosition).foreach { p =>
-          build(evaluator, p, generator, database, maxDbSize) // TODO would be better not to use recursion
-        }
+        // Do not generate new positions if the pos is known already, to avoid dead loops.
+        // Alternative: check that the generated position is not in the queue before adding it.
+        generator(nextPos).foreach ( queue += _ )
       }
     }
 
@@ -62,9 +67,9 @@ object DatabaseBuilder {
     // Note that both the evaluations and the stats from the db will be for the other player on roll, so the final equity has to be reversed (by switchTurn)
     val weightedEqs = weightedDice.map { case Seq(w, die1, die2) =>
       val statsAfterBestMove = MoveGenerator.generateMoves(position, die1, die2).map { m =>
-        val newPos = Position.applyMove(m, position)
+        val newPos = Position.switchTurn(Position.applyMove(m, position))
         val newPosId = newPos.gnuId
-        database.getOrElse(newPosId, evaluator(newPos).getOrElse(sys.error(s"Cannot evaluate position $newPosId")))
+        database.getOrElse(newPosId, evaluator(newPos).getOrElse(sys.error(s"Cannot evaluate position $newPosId"))).switchTurn
       }.maxBy(_.equity)
       (w, statsAfterBestMove.multiplyWeight(w))
     }
@@ -73,7 +78,7 @@ object DatabaseBuilder {
     val totalWeight = weightedEqs.map(_._1).sum
     if (totalWeight == 0) sys.error(s"Can't evaluate position with no possible move: $position")
     val aggregatedStats = GameStatistics.aggregate(weightedEqs.map(_._2))
-    aggregatedStats.multiplyWeight(36.0 / totalWeight)
+    aggregatedStats.multiplyWeight(1.0 / totalWeight)
   }
 }
 
