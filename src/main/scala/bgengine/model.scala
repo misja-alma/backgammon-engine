@@ -100,10 +100,12 @@ package object model {
   case class Position(whiteCheckers: MultiSet[Int], blackCheckers: MultiSet[Int], turn: Player, cubePosition: CubePosition) {
     import Player._
 
-    lazy val gnuId = {
+    lazy val positionId = {
       val rec = toPositionRecord
       rec.getMatchId + ":" + rec.getPositionId
     }
+
+    lazy val highestOccupiedPointForPlayerOnRoll = highestOccupiedPoint(turn)
 
     /**
      * Example:

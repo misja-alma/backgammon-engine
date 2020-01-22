@@ -7,6 +7,27 @@ import scala.collection.MultiSet
 
 class PositionTest extends FlatSpec with Matchers {
 
+  "moveChecker" should "return a position with the checker moved and leave the original intact" in {
+    val position = Position(
+      MultiSet.from(Array(1,0,0,0,0,0,0,0,0,0,0,0,0,0,0)),
+      MultiSet.from(Array(6,6,6,6,6,8,8,13,13,13,13,13,13,24,23)),
+      Player.White,
+      CubePosition(Player.Nobody, 1))
+
+    val result = Position.moveChecker(position.turn, 0, 2, position)
+
+    result should equal(Position(
+      MultiSet.from(Array(1,2,0,0,0,0,0,0,0,0,0,0,0,0,0)),
+      MultiSet.from(Array(6,6,6,6,6,8,8,13,13,13,13,13,13,24,23)),
+      Player.White,
+      CubePosition(Player.Nobody, 1)))
+    position should equal(Position(
+      MultiSet.from(Array(1,0,0,0,0,0,0,0,0,0,0,0,0,0,0)),
+      MultiSet.from(Array(6,6,6,6,6,8,8,13,13,13,13,13,13,24,23)),
+      Player.White,
+      CubePosition(Player.Nobody, 1)))
+  }
+
   "fromString" should "return the inverse of toString" in {
     val position = Position(
       MultiSet.from(Array(6,6,6,6,6,8,8,13,13,13,13,13,13,24,24)),
@@ -27,7 +48,7 @@ class PositionTest extends FlatSpec with Matchers {
       Player.Nobody,
       CubePosition(Player.Nobody, 1))
 
-    val gnuId = position.gnuId
+    val gnuId = position.positionId
     val posConverted = Position.fromGnuId(gnuId)
 
     posConverted should be(position)
@@ -52,6 +73,6 @@ class PositionTest extends FlatSpec with Matchers {
       CubePosition(Player.Black, 2))
     val positionRecord = position.toPositionRecord
 
-    position.gnuId should be(positionRecord.getMatchId + ":" + positionRecord.getPositionId)
+    position.positionId should be(positionRecord.getMatchId + ":" + positionRecord.getPositionId)
   }
 }
