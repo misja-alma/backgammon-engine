@@ -1,9 +1,10 @@
 package bgengine
 
+import bgengine.model.Player.Player
+
 import scala.collection.{MultiSet, mutable}
 
 package object model {
-  import bgengine.model.Player.Player
 
   // Model: Session -> Game* -> Position*
 
@@ -145,7 +146,7 @@ package object model {
 
       def convertCheckers(cs: MultiSet[Int]): Array[Int] =
         (0 to 25).map(cs.get).toArray
-      
+
       def convertPlayerOnRoll: Int = turn match {
         case White => 1
         case Black => 0
